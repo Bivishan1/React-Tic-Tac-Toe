@@ -18,10 +18,10 @@ function Square({ value, onSquareClick }) {
 
 
 
-function App() {
+function App({ xIsNext, square, onPlay }) {
   // default set move is X.
-  const [xIsNext, setXisNext] = useState(true);
-  const [square, setSquare] = useState(Array(9).fill(null))
+  // const [xIsNext, setXisNext] = useState(true);
+  // const [square, setSquare] = useState(Array(9).fill(null))
 
   function handleClick(i) {
     // earlier existing if already clicked in square or they are winner 
@@ -36,14 +36,15 @@ function App() {
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
-      nextSquares[i] = "O"
+      nextSquares[i] = "O";
     }
-    setSquare(nextSquares);
-    setXisNext(!xIsNext);
+    onPlay(nextSquares);
+    // setSquare(nextSquares);
+    // setXisNext(!xIsNext);
   }
 
   const winner = calculateWinner(square);
-  let status;
+  let status;// to display winner or looser
   if (winner) {
     status = "winner: " + winner;
   } else {
@@ -71,10 +72,52 @@ function App() {
   );
 }
 
-function calculateWinner(square) {
+function Game() {
+  const [xIsNext, setXisNext] = useState(true);
+  const [history, setHistory] = useState([Array(9).fill(null)]); // representing each array state i.e. nulls
+  const currentSquares = history[history.length - 1];
+  //to keep track of user step which is viewing
+  const [currentMove, setCurrentMove] = useState(0);
 
+  function handlePlay(nextSquares) {
+    setHistory([...history, nextSquares]);
+    setXisNext(!xIsNext);
+  }
+
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+    setXisNext(nextMove % 2 === 0);
+  }
+
+  const moves = history.map((square, move) => {
+    let description;
+    if (move > 0) {
+      description = 'Go to move #' + move;
+    } else {
+      description = "Go to game start";
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+  });
+
+  return (
+    <div className="game">
+      <div className="game-board">
+
+        <App xIsNext={xIsNext} square={currentSquares} onPlay={handlePlay} />
+      </div>
+      <div className="game-info">
+        <ol>{moves}</ol>
+      </div>
+    </div>
+  )
+}
+
+function calculateWinner(square) {
   //creating every square index to check whether the same or cross line has matched
-  // Define all possible winning lines in tic-tac-toe
   const lines = [
     [0, 1, 2], // top row
     [3, 4, 5], // middle row
@@ -87,9 +130,9 @@ function calculateWinner(square) {
   ];
 
   for (let i = 0; i < lines.length; i++) {
-    //assigning one step forward square value i.e. destructing the square line values.
+
     const [a, b, c] = lines[i]; //// Destructure the current line
-    //checking whether first index value match with other same line values
+
     // Check if the squares at positions a, b, and c are all the same and not null/undefined
     if (square[a] && square[a] === square[b] && square[a] === square[c] && square[c]) {
       return square[a]; // Return the symbol (either 'X' or 'O') that won
@@ -98,4 +141,4 @@ function calculateWinner(square) {
   return null;
 }
 
-export default App;
+export default Game;
