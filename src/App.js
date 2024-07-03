@@ -73,20 +73,24 @@ function App({ xIsNext, square, onPlay }) {
 }
 
 function Game() {
-  const [xIsNext, setXisNext] = useState(true);
+  // const [xIsNext, setXisNext] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]); // representing each array state i.e. nulls
-  const currentSquares = history[history.length - 1];
-  //to keep track of user step which is viewing
   const [currentMove, setCurrentMove] = useState(0);
 
+  //storing state as variable to reduce the redundant from setCurrentMove
+  const xIsNext = currentMove % 2 === 0;
+  const currentSquares = history[currentMove];
+
   function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]);
-    setXisNext(!xIsNext);
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+    // setXisNext(!xIsNext);
   }
 
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
-    setXisNext(nextMove % 2 === 0);
+    // setXisNext(nextMove % 2 === 0);
   }
 
   const moves = history.map((square, move) => {
